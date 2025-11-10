@@ -31,14 +31,16 @@ export type AstrakConfig = {
 
 // --- START: FILL THESE WITH YOUR REAL EMBED LINKS ---
 // Example: Replace with your Looker Studio Pro embed URLs for the group overview
-const OVERVIEW_WEEKLY = "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd";
-const OVERVIEW_MONTHLY = "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd";
+const OVERVIEW_WEEKLY =
+  "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd";
+const OVERVIEW_MONTHLY =
+  "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd";
 
 // For each brand, provide a weekly & monthly URL per tab.
 // Use placeholders now and we’ll paste real links later.
 const PLACEHOLDER = "https://lookerstudio.google.com/embed/reporting/REPLACE_ME";
 
-// Example brand IDs/names — change to your actual eight brands
+// Example brand IDs/names — change to your actual brands
 const BRAND_LIST: Array<{ id: string; name: string }> = [
   { id: "astrak", name: "Astrak" },
   { id: "epd", name: "EPD" },
@@ -51,8 +53,8 @@ const BRAND_LIST: Array<{ id: string; name: string }> = [
 function emptyBrandTabs(): BrandTabReports {
   return {
     channels: { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
-    funnel:   { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
-    seo:      { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
+    funnel: { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
+    seo: { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
     creative: { weekly: PLACEHOLDER, monthly: PLACEHOLDER },
   };
 }
@@ -65,25 +67,39 @@ export const astrakConfig: AstrakConfig = {
       monthly: OVERVIEW_MONTHLY,
     },
   },
-  brands: BRAND_LIST.map(({ id, name }) => ({
-    id,
-    name,
-    reports: emptyBrandTabs(),
-    insights: {
-      weekly: [
-        // Example card structure; optional manual notes:
-        // { metric: "ROAS", change: "-12%", why: "Meta CPC up 18%", next: "Shift £2k to PMax; pause low CTR ads" },
-      ],
-      monthly: [],
-    },
-  })),
+  brands: BRAND_LIST.map(({ id, name }) => {
+    // simple example: give Astrak some demo insights; others empty
+    const demoWeekly: Insight[] =
+      id === "astrak"
+        ? [
+            {
+              metric: "ROAS",
+              change: "-12%",
+              why: "Meta CPC increased ~18% WoW; PMax steady.",
+              next: "Shift £2k to Google PMax; pause two lowest CTR ad sets.",
+            },
+            {
+              metric: "Leads",
+              change: "+9%",
+              why: "SE PMax asset group launched; higher CVR on brand terms.",
+              next: "Expand best-performing headlines; add site links to PMax.",
+            },
+          ]
+        : [];
+
+    return {
+      id,
+      name,
+      reports: emptyBrandTabs(),
+      insights: {
+        weekly: demoWeekly,
+        monthly: [],
+      },
+    };
+  }),
   email: {
     weeklyTime: "Sun 08:00",
     monthlyTime: "1st 09:00",
     recipients: ["reports@kinsman.co"], // add real recipients later
   },
 };
-
-
-
-

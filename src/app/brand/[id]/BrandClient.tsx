@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { astrakConfig, type TabKey, type ViewMode } from "../../../config/astrak";
 import Embed from "../../components/Embed";
+import Insights from "../../components/Insights"; // ← NEW
 
 const TABS: TabKey[] = ["channels", "funnel", "seo", "creative"];
 
@@ -91,6 +92,12 @@ export default function BrandClient({ id }: { id: string }) {
       ) : (
         <Embed src={url} title={`${brand.name} • ${tab} (${mode})`} />
       )}
+
+      {/* Insights cards (renders below the embed) */}
+      <Insights
+        items={brand.insights?.[mode] ?? []}
+        title={`${brand.name} — ${mode[0].toUpperCase() + mode.slice(1)} Insights`}
+      />
     </main>
   );
 }

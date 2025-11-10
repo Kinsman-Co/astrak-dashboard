@@ -7,10 +7,7 @@ import Embed from "../../components/Embed";
 const TABS: TabKey[] = ["channels", "funnel", "seo", "creative"];
 
 export default function BrandClient({ id }: { id: string }) {
-  const brand = useMemo(
-    () => astrakConfig.brands.find((b) => b.id === id),
-    [id]
-  );
+  const brand = useMemo(() => astrakConfig.brands.find((b) => b.id === id), [id]);
 
   const [tab, setTab] = useState<TabKey>("channels");
   const [mode, setMode] = useState<ViewMode>("weekly");
@@ -27,8 +24,7 @@ export default function BrandClient({ id }: { id: string }) {
   }
 
   const url = brand.reports[tab][mode];
-  const isPlaceholder =
-    !url || url.includes("REPLACE_") || url.endsWith("/REPLACE_ME");
+  const isPlaceholder = !url || url.includes("REPLACE_") || url.endsWith("/REPLACE_ME");
 
   return (
     <main style={{ maxWidth: 1400, margin: "0 auto", padding: "1rem" }}>
@@ -81,7 +77,7 @@ export default function BrandClient({ id }: { id: string }) {
         <div
           style={{
             background: "#FFF8DB",
-            border: "1px solid "#FACC15",
+            border: "1px solid #FACC15",
             padding: "1rem",
             borderRadius: 8,
             textAlign: "center",

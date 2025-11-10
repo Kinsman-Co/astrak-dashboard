@@ -40,14 +40,11 @@ const PLACEHOLDER = "https://lookerstudio.google.com/embed/reporting/REPLACE_ME"
 
 // Example brand IDs/names — change to your actual eight brands
 const BRAND_LIST: Array<{ id: string; name: string }> = [
-  { id: "brand-a", name: "Brand A" },
-  { id: "brand-b", name: "Brand B" },
-  { id: "brand-c", name: "Brand C" },
-  { id: "brand-d", name: "Brand D" },
-  { id: "brand-e", name: "Brand E" },
-  { id: "brand-f", name: "Brand F" },
-  { id: "brand-g", name: "Brand G" },
-  { id: "brand-h", name: "Brand H" },
+  { id: "astrak", name: "Astrak" },
+  { id: "epd", name: "EPD" },
+  { id: "westtrak", name: "WestTrak" },
+  { id: "xtreme", name: "Xtreme" },
+  { id: "rtc", name: "RTC" },
 ];
 
 // Helper to make empty tab set you can edit later

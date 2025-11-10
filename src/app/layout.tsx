@@ -21,20 +21,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Kinsman & Co Dashboard
         </header>
         <nav
-          style={{
-            backgroundColor: "#1f2937",
-            padding: "0.5rem 2rem",
-            color: "white",
-            display: "flex",
-            gap: "1rem",
-          }}
-        >
-          <a href="/" style={{ color: "white", textDecoration: "none" }}>Overview</a>
-          <a href="/seo" style={{ color: "white", textDecoration: "none" }}>SEO</a>
-          <a href="/ads" style={{ color: "white", textDecoration: "none" }}>Ads</a>
-          <a href="/creative" style={{ color: "white", textDecoration: "none" }}>Creative</a>
-          <a href="/brands" style={{ color: "white", textDecoration: "none" }}>Brands</a>
-        </nav>
+  style={{
+    backgroundColor: "#1f2937",
+    padding: "0.5rem 2rem",
+    color: "white",
+    display: "flex",
+    gap: "1rem",
+  }}
+>
+  <a href="/" style={{ color: "white", textDecoration: "none" }}>Overview</a>
+  <a href="/brands" style={{ color: "white", textDecoration: "none" }}>Brands</a>
+</nav>
+
         <main style={{ padding: "2rem" }}>{children}</main>
       </body>
     </html>

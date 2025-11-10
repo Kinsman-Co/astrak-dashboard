@@ -68,6 +68,13 @@ export default function Home() {
           }}
         >
           <p>
-  Add real embed URLs in <code>src/config/astrak.ts</code> for{" "}
-  <code>{`overview.kpiReports.${mode}`}</code> to see the report here.
-</p>
+            Add real embed URLs in <code>src/config/astrak.ts</code> for{" "}
+            <code>{`overview.kpiReports.${mode}`}</code> to see the report here.
+          </p>
+        </div>
+      ) : (
+        <Embed src={url} title={`Overview (${mode})`} />
+      )}
+    </main>
+  );
+}

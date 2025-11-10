@@ -33,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="/seo" style={{ color: "white", textDecoration: "none" }}>SEO</a>
           <a href="/ads" style={{ color: "white", textDecoration: "none" }}>Ads</a>
           <a href="/creative" style={{ color: "white", textDecoration: "none" }}>Creative</a>
+          <a href="/brands" style={{ color: "white", textDecoration: "none" }}>Brands</a>
         </nav>
         <main style={{ padding: "2rem" }}>{children}</main>
       </body>

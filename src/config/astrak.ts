@@ -31,8 +31,8 @@ export type AstrakConfig = {
 
 // --- START: FILL THESE WITH YOUR REAL EMBED LINKS ---
 // Example: Replace with your Looker Studio Pro embed URLs for the group overview
-const OVERVIEW_WEEKLY = "https://lookerstudio.google.com/embed/reporting/REPLACE_GROUP_WEEKLY";
-const OVERVIEW_MONTHLY = "https://lookerstudio.google.com/embed/reporting/REPLACE_GROUP_MONTHLY";
+const OVERVIEW_WEEKLY = "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd";
+const OVERVIEW_MONTHLY = "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd";
 
 // For each brand, provide a weekly & monthly URL per tab.
 // Use placeholders now and we’ll paste real links later.

@@ -1,80 +1,31 @@
-"use client";
+import Link from "next/link";
+import { astrakConfig } from "../../config/astrak";
 
-import { useState } from "react";
-import Embed from "./components/Embed";
-import { astrakConfig } from "../config/astrak";
+export const metadata = { title: "Brands • Kinsman & Co Dashboard" };
 
-type ViewMode = "weekly" | "monthly";
-
-export default function Home() {
-  const [mode, setMode] = useState<ViewMode>("weekly");
-  const url = astrakConfig.overview.kpiReports[mode];
-
-  const isPlaceholder =
-    !url || url.includes("REPLACE_") || url.endsWith("/REPLACE_ME");
-
+export default function BrandsIndex() {
   return (
-    <main style={{ maxWidth: 1400, margin: "0 auto", padding: "1rem" }}>
-      <h1 style={{ textAlign: "center", margin: "1rem 0" }}>
-        {astrakConfig.overview.name}
-      </h1>
-
-      {/* Weekly / Monthly toggle */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "1rem",
-          marginBottom: "1rem",
-        }}
-      >
-        <button
-          onClick={() => setMode("weekly")}
-          style={{
-            background: mode === "weekly" ? "#111827" : "#E5E7EB",
-            color: mode === "weekly" ? "white" : "#111827",
-            border: "none",
-            borderRadius: "6px",
-            padding: "0.5rem 1rem",
-            cursor: "pointer",
-          }}
-        >
-          Weekly
-        </button>
-        <button
-          onClick={() => setMode("monthly")}
-          style={{
-            background: mode === "monthly" ? "#111827" : "#E5E7EB",
-            color: mode === "monthly" ? "white" : "#111827",
-            border: "none",
-            borderRadius: "6px",
-            padding: "0.5rem 1rem",
-            cursor: "pointer",
-          }}
-        >
-          Monthly
-        </button>
-      </div>
-
-      {/* Embed or helpful message */}
-      {isPlaceholder ? (
-        <div
-          style={{
-            background: "#FFF8DB",
-            border: "1px solid #FACC15",
-            padding: "1rem",
-            borderRadius: 8,
-            textAlign: "center",
-          }}
-        >
-          <p>
-            Add real embed URLs in <code>src/config/astrak.ts</code> for{" "}
-            <code>{`overview.kpiReports.${mode}`}</code> to see the report here.
-          </p>
-        </div>
-      ) : (
-        <Embed src={url} title={`Overview (${mode})`} />
-      )}
+    <main style={{ maxWidth: 900, margin: "0 auto", padding: "1rem" }}>
+      <h1 style={{ textAlign: "center", margin: "1rem 0" }}>Astrak Brands</h1>
+      <ul style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        {astrakConfig.brands.map((b) => (
+          <li key={b.id}>
+            <Link
+              href={`/brand/${b.id}`}
+              style={{
+                display: "block",
+                padding: "12px 14px",
+                borderRadius: 8,
+                background: "#111827",
+                color: "white",
+                textDecoration: "none",
+              }}
+            >
+              {b.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

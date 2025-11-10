@@ -2,15 +2,19 @@
 import { useState } from "react";
 import Embed from "../components/Embed";
 
+type ReportKey = "market" | "paid" | "meta";
+
 export default function AdsPage() {
-  const [view, setView] = useState("paid");
+  const [view, setView] = useState<ReportKey>("paid");
 
   const reports = {
     market:
       "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_6xmclhf1td",
-    paid: "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd",
-    meta: "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd",
-  };
+    paid:
+      "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd",
+    meta:
+      "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd",
+  } as const;
 
   return (
     <main style={{ marginTop: "1rem" }}>

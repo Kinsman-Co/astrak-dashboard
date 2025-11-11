@@ -3,13 +3,13 @@
 export type ViewMode = "weekly" | "monthly";
 export type TabKey = "channels" | "funnel" | "seo" | "creative";
 
-export type ReportMap = Record<ViewMode, string>;               // weekly/monthly URL
-export type BrandTabReports = Record<TabKey, ReportMap>;       // tabs -> weekly/monthly
+export type ReportMap = Record<ViewMode, string>; // weekly/monthly URL
+export type BrandTabReports = Record<TabKey, ReportMap>; // tabs -> weekly/monthly
 export type Insight = { metric: string; change: string; why: string; next: string };
 
 export type BrandConfig = {
-  id: string;              // slug, e.g. "brand-a"
-  name: string;            // display name, e.g. "Brand A"
+  id: string; // slug, e.g. "brand-a"
+  name: string; // display name, e.g. "Brand A"
   reports: BrandTabReports;
   insights?: Record<ViewMode, Insight[]>; // optional manual notes; AI will live in Looker
 };
@@ -23,21 +23,25 @@ export type AstrakConfig = {
   overview: OverviewConfig;
   brands: BrandConfig[];
   email: {
-    weeklyTime: "Sun 08:00";     // brief requirement
+    weeklyTime: "Sun 08:00"; // brief requirement
     monthlyTime: "1st 09:00";
-    recipients: string[];        // who gets summaries
+    recipients: string[]; // who gets summaries
   };
 };
 
 // --- START: FILL THESE WITH YOUR REAL EMBED LINKS ---
+
 // Example: Replace with your Looker Studio Pro embed URLs for the group overview
 const OVERVIEW_WEEKLY =
   "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_b9qkt7wmmd";
 const OVERVIEW_MONTHLY =
   "https://lookerstudio.google.com/embed/reporting/b8c62838-0008-4c3c-b464-fb38ce6c452f/page/p_s20tsv7wqd";
 
-// For each brand, provide a weekly & monthly URL per tab.
-// Use placeholders now and we’ll paste real links later.
+// Real Astrak monthly channels report
+const ASTRAK_CHANNELS_MONTHLY =
+  "https://lookerstudio.google.com/embed/reporting/a74ed8b7-eb9b-44f4-86c1-1ba1152535ea/page/ZX6eF";
+
+// Placeholder for reports not yet connected
 const PLACEHOLDER = "https://lookerstudio.google.com/embed/reporting/REPLACE_ME";
 
 // Example brand IDs/names — change to your actual brands
@@ -68,7 +72,15 @@ export const astrakConfig: AstrakConfig = {
     },
   },
   brands: BRAND_LIST.map(({ id, name }) => {
-    // simple example: give Astrak some demo insights; others empty
+    // base empty reports
+    const reports = emptyBrandTabs();
+
+    // attach real Astrak monthly Channels report
+    if (id === "astrak") {
+      reports.channels.monthly = ASTRAK_CHANNELS_MONTHLY;
+    }
+
+    // demo insights for Astrak only
     const demoWeekly: Insight[] =
       id === "astrak"
         ? [
@@ -90,7 +102,7 @@ export const astrakConfig: AstrakConfig = {
     return {
       id,
       name,
-      reports: emptyBrandTabs(),
+      reports,
       insights: {
         weekly: demoWeekly,
         monthly: [],

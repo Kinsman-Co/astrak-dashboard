@@ -12,8 +12,7 @@ export type Insight = {
 
 type Props = {
   brandId: string;
-  /** e.g. "channels.monthly", "seo.weekly" */
-  viewKey: string;
+  viewKey: string; // e.g. "channels.monthly"
   refreshKey?: string | number;
   title?: string;
 };
@@ -30,9 +29,7 @@ export default function InsightsClient({
   const [err, setErr] = useState<string | null>(null);
 
   const apiUrl = useMemo(() => {
-    return `/api/insights/${encodeURIComponent(brandId)}/${encodeURIComponent(
-      viewKey
-    )}`;
+    return `/api/insights/${encodeURIComponent(brandId)}/${encodeURIComponent(viewKey)}`;
   }, [brandId, viewKey]);
 
   useEffect(() => {
@@ -71,15 +68,7 @@ export default function InsightsClient({
 
   if (loading) {
     return (
-      <div
-        style={{
-          padding: "1rem",
-          background: "#F1F5F9",
-          border: "1px solid #E2E8F0",
-          borderRadius: 8,
-          textAlign: "center",
-        }}
-      >
+      <div style={{ padding: "1rem", background: "#F1F5F9", border: "1px solid #E2E8F0", borderRadius: 8, textAlign: "center" }}>
         Loading insights…
       </div>
     );
@@ -87,14 +76,7 @@ export default function InsightsClient({
 
   if (err) {
     return (
-      <div
-        style={{
-          padding: "1rem",
-          background: "#FEF2F2",
-          border: "1px solid #FCA5A5",
-          borderRadius: 8,
-        }}
-      >
+      <div style={{ padding: "1rem", background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8 }}>
         <strong>Couldn’t load insights.</strong>
         <div style={{ marginTop: 6, color: "#991B1B" }}>{err}</div>
       </div>
@@ -103,14 +85,7 @@ export default function InsightsClient({
 
   if (!insights.length) {
     return (
-      <div
-        style={{
-          padding: "1rem",
-          background: "#FFFBEB",
-          border: "1px solid #FDE68A",
-          borderRadius: 8,
-        }}
-      >
+      <div style={{ padding: "1rem", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
         No insights generated yet.
       </div>
     );
@@ -118,72 +93,34 @@ export default function InsightsClient({
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          flexWrap: "wrap",
-          gap: 8,
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
         <h2 style={{ fontSize: 16, margin: 0 }}>{title || "Insights"}</h2>
         {updatedAt && (
-          <span
-            style={{
-              fontSize: 12,
-              padding: "2px 8px",
-              borderRadius: 999,
-              background: "#EEF2FF",
-              border: "1px solid #C7D2FE",
-            }}
-          >
+          <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 999, background: "#EEF2FF", border: "1px solid #C7D2FE" }}>
             Updated {new Date(updatedAt).toLocaleString()}
           </span>
         )}
       </div>
 
       {insights.map((ins, idx) => (
-        <div
-          key={idx}
-          style={{
-            border: "1px solid #E5E7EB",
-            borderRadius: 12,
-            padding: "1rem",
-            background: "#FFFFFF",
-          }}
-        >
+        <div key={idx} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: "1rem", background: "#FFFFFF" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div style={{ fontWeight: 600 }}>{ins.metric}</div>
             <div style={{ opacity: 0.8 }}>{ins.change ?? ""}</div>
           </div>
 
           <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>
-              Why
-            </div>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>Why</div>
             <div style={{ marginTop: 4 }}>{ins.why}</div>
           </div>
 
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>
-              Next
-            </div>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>Next</div>
             <div style={{ marginTop: 4 }}>{ins.next}</div>
           </div>
 
           {ins.confidence && (
-            <div
-              style={{
-                marginTop: 10,
-                display: "inline-block",
-                padding: "2px 8px",
-                borderRadius: 999,
-                background: "#EEF2FF",
-                border: "1px solid #C7D2FE",
-                fontSize: 12,
-              }}
-            >
+            <div style={{ marginTop: 10, display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#EEF2FF", border: "1px solid #C7D2FE", fontSize: 12 }}>
               Confidence: {ins.confidence}
             </div>
           )}

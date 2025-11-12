@@ -3,15 +3,15 @@
 import React, { useMemo } from "react";
 
 type EmbedProps = {
-  /** Base Looker Studio URL (no query params). Put in env and pass down. */
+  /** Base Looker Studio embed URL (no query params). */
   src: string;
-  /** Optional query params to append to the embed url (e.g. brand, view mode). */
+  /** Optional query params to append to the URL. */
   params?: Record<string, string | number | boolean | undefined>;
   /** Accessible title for the iframe. */
   title?: string;
-  /** Height in pixels; component is responsive to width. */
+  /** iFrame height (px). */
   height?: number;
-  /** If true, removes the border. */
+  /** If true, removes outer border. */
   borderless?: boolean;
 };
 
@@ -29,7 +29,7 @@ export default function Embed({
         if (v !== undefined && v !== null) u.searchParams.set(k, String(v));
       });
     }
-    // Recommended Looker Studio flags for embedding
+    // Minimal chrome + allow responsive width
     if (!u.searchParams.has("rm")) u.searchParams.set("rm", "minimal");
     if (!u.searchParams.has("wd")) u.searchParams.set("wd", "true");
     return u.toString();

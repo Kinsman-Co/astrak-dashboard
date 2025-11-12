@@ -32,9 +32,9 @@ const REPORT_URLS: Record<TabKey, Partial<Record<ViewMode, string>>> = {
 
 export default function BrandClient({ id }: { id: string }) {
   const [tab, setTab] = useState<TabKey>("channels");
-  const [mode, setMode] = useState<ViewMode>("monthly"); // default to Monthly per your screenshot
+  const [mode, setMode] = useState<ViewMode>("monthly"); // default to Monthly for this task
 
-  // (Optional) allow deep-linking via query (?tab=channels&mode=monthly)
+  // Optional: deep-linking via ?tab=channels&mode=monthly
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const t = sp.get("tab") as TabKey | null;
@@ -45,8 +45,6 @@ export default function BrandClient({ id }: { id: string }) {
 
   const reportUrl = useMemo(() => {
     const url = REPORT_URLS[tab]?.[mode] || "";
-    if (!url) return "";
-    // Append params in the Embed component; just pass the base here.
     return url;
   }, [tab, mode]);
 
@@ -112,12 +110,12 @@ export default function BrandClient({ id }: { id: string }) {
             marginBottom: 12,
           }}
         >
-          Missing embed URL for <strong>{tab}</strong> / <strong>{mode}</strong>. Set the
-          corresponding <code>NEXT_PUBLIC_LS_*_URL</code> env var.
+          Missing embed URL for <strong>{tab}</strong> / <strong>{mode}</strong>. Set the corresponding{" "}
+          <code>NEXT_PUBLIC_LS_*_URL</code> env var.
         </div>
       )}
 
-      {/* === Insights directly under the report, only for Channels + Monthly === */}
+      {/* Insights directly under the report, only for Channels + Monthly */}
       {tab === "channels" && mode === "monthly" && (
         <div style={{ marginTop: 16 }}>
           <MonthlyInsights brandId={id} />

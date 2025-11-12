@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export type Insight = {
   metric: string;
@@ -22,7 +22,7 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
   const [err, setErr] = useState<string | null>(null);
 
   const apiUrl = useMemo(() => {
-    // matches your n8n screenshot: /api/insights/<brand>/monthly
+    // Matches your existing API route: /api/insights/:brand/monthly
     return `/api/insights/${encodeURIComponent(brandId)}/monthly`;
   }, [brandId]);
 
@@ -35,7 +35,6 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
-        // Accept either { insights: [...], updatedAt } or raw array [...]
         const list = Array.isArray(data) ? data : Array.isArray(data.insights) ? data.insights : [];
         const ts =
           (data.updatedAt as string) ||
@@ -63,7 +62,15 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
 
   if (loading) {
     return (
-      <div style={{ padding: "1rem", background: "#F1F5F9", border: "1px solid #E2E8F0", borderRadius: 8, textAlign: "center" }}>
+      <div
+        style={{
+          padding: "1rem",
+          background: "#F1F5F9",
+          border: "1px solid #E2E8F0",
+          borderRadius: 8,
+          textAlign: "center",
+        }}
+      >
         Loading monthly insights…
       </div>
     );
@@ -71,7 +78,14 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
 
   if (err) {
     return (
-      <div style={{ padding: "1rem", background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8 }}>
+      <div
+        style={{
+          padding: "1rem",
+          background: "#FEF2F2",
+          border: "1px solid #FCA5A5",
+          borderRadius: 8,
+        }}
+      >
         <strong>Couldn’t load insights.</strong>
         <div style={{ marginTop: 6, color: "#991B1B" }}>{err}</div>
       </div>
@@ -80,7 +94,14 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
 
   if (!insights.length) {
     return (
-      <div style={{ padding: "1rem", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+      <div
+        style={{
+          padding: "1rem",
+          background: "#FFFBEB",
+          border: "1px solid #FDE68A",
+          borderRadius: 8,
+        }}
+      >
         No monthly insights available yet.
       </div>
     );
@@ -88,7 +109,15 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
         <h2 style={{ fontSize: 16, margin: 0 }}>Insights (Monthly)</h2>
         {updatedAt && (
           <span
@@ -121,12 +150,16 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
           </div>
 
           <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>Why</div>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>
+              Why
+            </div>
             <div style={{ marginTop: 4 }}>{ins.why}</div>
           </div>
 
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>Next</div>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, opacity: 0.6 }}>
+              Next
+            </div>
             <div style={{ marginTop: 4 }}>{ins.next}</div>
           </div>
 
@@ -138,7 +171,7 @@ export default function MonthlyInsights({ brandId, refreshKey }: MonthlyInsights
                 padding: "2px 8px",
                 borderRadius: 999,
                 background: "#EEF2FF",
-                border: "1px solid "#C7D2FE",
+                border: "1px solid #C7D2FE",
                 fontSize: 12,
               }}
             >

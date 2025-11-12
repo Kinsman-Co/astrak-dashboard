@@ -1,8 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { astrakConfig, type TabKey, type ViewMode } from "../../../config/astrak";
 import Embed from "../../components/Embed";
+import Insights from "../../components/Insights";
+
+type Insight = {
+  metric: string;
+  change?: string;
+  why: string;
+  next: string;
+  confidence?: string;
+};
 
 const TABS: TabKey[] = ["channels", "funnel", "seo", "creative"];
 
@@ -11,6 +20,29 @@ export default function BrandClient({ id }: { id: string }) {
 
   const [tab, setTab] = useState<TabKey>("channels");
   const [mode, setMode] = useState<ViewMode>("weekly");
+
+  // NEW: hold API-fed monthly insights
+  const [monthlyInsights, setMonthlyInsights] = useState<Insight[]>([]);
+  const [loadedMonthly, setLoadedMonthly] = useState(false);
+
+  useEffect(() => {
+    // Only fetch when we need them (channels + monthly)
+    if (tab !== "channels" || mode !== "monthly") return;
+
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "";
+
+    fetch(`${origin}/api/insights/${id}/monthly`, { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : { insights: [] })
+      .then((data) => {
+        setMonthlyInsights(Array.isArray(data?.insights) ? data.insights : []);
+        setLoadedMonthly(true);
+      })
+      .catch(() => {
+        setMonthlyInsights([]);
+        setLoadedMonthly(true);
+      });
+  }, [id, tab, mode]);
 
   if (!brand) {
     return (
@@ -25,6 +57,12 @@ export default function BrandClient({ id }: { id: string }) {
 
   const url = brand.reports[tab][mode];
   const isPlaceholder = !url || url.includes("REPLACE_") || url.endsWith("/REPLACE_ME");
+
+  // Keep weekly demo insights from config; switch to API insights for monthly
+  const items: Insight[] =
+    tab === "channels" && mode === "monthly"
+      ? monthlyInsights
+      : (brand.insights?.[mode] ?? []);
 
   return (
     <main style={{ maxWidth: 1400, margin: "0 auto", padding: "1rem" }}>
@@ -90,6 +128,14 @@ export default function BrandClient({ id }: { id: string }) {
         </div>
       ) : (
         <Embed src={url} title={`${brand.name} • ${tab} (${mode})`} />
+      )}
+
+      {/* Insights cards (same component; items come from config or API) */}
+      {tab === "channels" && (mode !== "monthly" || loadedMonthly) && (
+        <Insights
+          items={items}
+          title={`${brand.name} — ${mode[0].toUpperCase() + mode.slice(1)} Insights`}
+        />
       )}
     </main>
   );

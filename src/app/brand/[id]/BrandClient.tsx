@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Embed from "../../components/Embed";
-import InsightsClient from "../../components/InsightsClient";
+import InsightsClient from "./InsightsClient";
 
 export type TabKey = "channels" | "funnel" | "seo" | "creative";
 export type ViewMode = "weekly" | "monthly";
@@ -10,7 +10,7 @@ export type ViewMode = "weekly" | "monthly";
 const TABS: TabKey[] = ["channels", "funnel", "seo", "creative"];
 const MODES: ViewMode[] = ["weekly", "monthly"];
 
-/** Base embed URLs per section+mode (public envs) */
+/** Public embed URLs per section+mode */
 const REPORT_URLS: Record<TabKey, Partial<Record<ViewMode, string>>> = {
   channels: {
     weekly: process.env.NEXT_PUBLIC_LS_CHANNELS_WEEKLY_URL || "",
@@ -34,7 +34,7 @@ export default function BrandClient({ id }: { id: string }) {
   const [tab, setTab] = useState<TabKey>("channels");
   const [mode, setMode] = useState<ViewMode>("monthly");
 
-  // Optional deep-linking (?tab=channels&mode=weekly)
+  // Allow deep-linking via ?tab=channels&mode=monthly
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const t = sp.get("tab") as TabKey | null;
@@ -43,10 +43,7 @@ export default function BrandClient({ id }: { id: string }) {
     if (m && MODES.includes(m)) setMode(m);
   }, []);
 
-  const reportUrl = useMemo(() => {
-    return REPORT_URLS[tab]?.[mode] || "";
-  }, [tab, mode]);
-
+  const reportUrl = useMemo(() => REPORT_URLS[tab]?.[mode] || "", [tab, mode]);
   const viewKey = `${tab}.${mode}`; // e.g. "channels.monthly"
 
   return (
@@ -55,7 +52,7 @@ export default function BrandClient({ id }: { id: string }) {
         {id}
       </div>
 
-      {/* Tab controls */}
+      {/* Tabs */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
         {TABS.map((t) => (
           <button
@@ -75,7 +72,7 @@ export default function BrandClient({ id }: { id: string }) {
         ))}
       </div>
 
-      {/* Mode controls */}
+      {/* Modes */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
         {MODES.map((m) => (
           <button
@@ -95,7 +92,7 @@ export default function BrandClient({ id }: { id: string }) {
         ))}
       </div>
 
-      {/* Embedded Looker Studio report */}
+      {/* Embed */}
       {reportUrl ? (
         <Embed
           src={reportUrl}
@@ -113,12 +110,12 @@ export default function BrandClient({ id }: { id: string }) {
             marginBottom: 12,
           }}
         >
-          Add an embed URL for <strong>{tab}</strong> / <strong>{mode}</strong> (public env:
+          Add an embed URL for <strong>{tab}</strong> / <strong>{mode}</strong> (env:
           <code> NEXT_PUBLIC_LS_{tab.toUpperCase()}_{mode.toUpperCase()}_URL</code>).
         </div>
       )}
 
-      {/* Insights under every page (no demo; shows "No insights generated yet.") */}
+      {/* Insights (always mounted under the embed) */}
       <div style={{ marginTop: 16 }}>
         <InsightsClient
           brandId={id}

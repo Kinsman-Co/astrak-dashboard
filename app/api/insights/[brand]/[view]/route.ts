@@ -8,12 +8,13 @@ function keyFor(brand: string, view: ViewMode) {
   return `insights:${brand}:${view}`;
 }
 
-// GET /api/insights/:brand/:view
+// ✅ Updated route handlers compatible with Next.js 16
+
 export async function GET(
   _req: Request,
-  { params }: { params: { brand: string; view: ViewMode } }
+  context: any
 ) {
-  const { brand, view } = params;
+  const { brand, view } = context.params as { brand: string; view: ViewMode };
   const record = (await kv.get(keyFor(brand, view))) as
     | { insights?: Insight[]; updatedAt?: string }
     | null;
@@ -26,12 +27,12 @@ export async function GET(
   });
 }
 
-// POST /api/insights/:brand/:view   (body: { insights: Insight[] })
-// Header: Authorization: Bearer <INSIGHTS_WRITE_TOKEN>
 export async function POST(
   req: Request,
-  { params }: { params: { brand: string; view: ViewMode } }
+  context: any
 ) {
+  const { brand, view } = context.params as { brand: string; view: ViewMode };
+
   const auth = req.headers.get("authorization") || "";
   const token = process.env.INSIGHTS_WRITE_TOKEN;
 
@@ -39,16 +40,14 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { brand, view } = params;
-
-  let payload: unknown;
+  let payload: any;
   try {
     payload = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const insights = (payload as any)?.insights;
+  const insights = payload?.insights;
   if (!Array.isArray(insights)) {
     return NextResponse.json({ error: "Missing insights[]" }, { status: 400 });
   }

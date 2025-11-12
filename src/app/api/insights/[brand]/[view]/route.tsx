@@ -1,60 +1,80 @@
-import { kv } from "@vercel/kv";
 import { NextResponse } from "next/server";
+import { kv } from "@vercel/kv";
 
-type ViewMode = "weekly" | "monthly";
-type Insight = { metric: string; change?: string; why: string; next: string; confidence?: string };
+type Params = { params: { brand: string; view: string } };
 
-function keyFor(brand: string, view: ViewMode) {
-  return `insights:${brand}:${view}`;
+const REQUIRED_TOKEN_ENV = "9fb73837248c6ad8714555b45b8ce95a25426131b02eaef6fbfe170ca00ad072";
+
+/** Canonical KV key: insights:<brandLower>:<viewLower> */
+function kvKey(brand: string, view: string) {
+  const b = (brand || "").trim().toLowerCase();
+  const v = (view || "").trim().toLowerCase();
+  return `insights:${b}:${v}`;
 }
 
-// GET /api/insights/astrak/monthly  -> { brand, view, updatedAt, insights: Insight[] }
-export async function GET(
-  _req: Request,
-  { params }: { params: { brand: string; view: ViewMode } }
-) {
-  const { brand, view } = params;
-  const record = (await kv.get(keyFor(brand, view))) as
-    | { insights?: Insight[]; updatedAt?: string }
-    | null;
+export async function GET(_req: Request, { params }: Params) {
+  const brand = params.brand ?? "";
+  const view = params.view ?? "";
 
-  return NextResponse.json({
-    brand,
-    view,
-    updatedAt: record?.updatedAt ?? null,
-    insights: record?.insights ?? [],
-  });
+  if (!brand || !view) {
+    return NextResponse.json(
+      { insights: [], updatedAt: null, error: "Missing brand or view" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const stored = await kv.get<{ insights: any[]; updatedAt?: string }>(
+      kvKey(brand, view)
+    );
+
+    if (!stored) {
+      return NextResponse.json({ insights: [], updatedAt: null });
+    }
+
+    const insights = Array.isArray(stored.insights) ? stored.insights : [];
+    const updatedAt = stored.updatedAt ?? null;
+
+    return NextResponse.json({ insights, updatedAt });
+  } catch (err: any) {
+    return NextResponse.json(
+      { insights: [], updatedAt: null, error: err?.message || "Read failed" },
+      { status: 500 }
+    );
+  }
 }
 
-// POST /api/insights/astrak/monthly   body: { insights: Insight[] }
-// Header: Authorization: Bearer <INSIGHTS_WRITE_TOKEN>
-export async function POST(
-  req: Request,
-  { params }: { params: { brand: string; view: ViewMode } }
-) {
-  const auth = req.headers.get("authorization") || "";
-  const token = process.env.INSIGHTS_WRITE_TOKEN;
+export async function POST(req: Request, { params }: Params) {
+  const brand = params.brand ?? "";
+  const view = params.view ?? "";
 
-  if (!token || !auth.startsWith("Bearer ") || auth.slice(7) !== token) {
+  if (!brand || !view) {
+    return NextResponse.json({ error: "Missing brand or view" }, { status: 400 });
+  }
+
+  // Bearer token guard
+  const required = process.env[REQUIRED_TOKEN_ENV];
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+
+  if (!required || token !== required) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { brand, view } = params;
-
-  let payload: unknown;
   try {
-    payload = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    const insights = Array.isArray(body?.insights) ? body.insights : [];
+
+    await kv.set(kvKey(brand, view), {
+      insights,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json({ ok: true, count: insights.length });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err?.message || "Write failed" },
+      { status: 500 }
+    );
   }
-
-  const insights = (payload as any)?.insights;
-  if (!Array.isArray(insights)) {
-    return NextResponse.json({ error: "Missing insights[]" }, { status: 400 });
-  }
-
-  const record = { insights, updatedAt: new Date().toISOString() };
-  await kv.set(keyFor(brand, view), record);
-
-  return NextResponse.json({ ok: true, ...record });
 }

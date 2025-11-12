@@ -11,25 +11,22 @@ export type Insight = {
 };
 
 type Props = {
-  brandId: string;
-  viewKey: string; // e.g. "channels.monthly"
+  brandId: string;         // e.g. "Astrak" or "astrak"
+  viewKey: string;         // e.g. "Channels.Monthly" or "channels.monthly"
   refreshKey?: string | number;
   title?: string;
 };
 
-export default function InsightsClient({
-  brandId,
-  viewKey,
-  refreshKey,
-  title,
-}: Props) {
+export default function InsightsClient({ brandId, viewKey, refreshKey, title }: Props) {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
   const apiUrl = useMemo(() => {
-    return `/api/insights/${encodeURIComponent(brandId)}/${encodeURIComponent(viewKey)}`;
+    const b = (brandId || "").toLowerCase();
+    const v = (viewKey || "").toLowerCase();
+    return `/api/insights/${encodeURIComponent(b)}/${encodeURIComponent(v)}`;
   }, [brandId, viewKey]);
 
   useEffect(() => {
@@ -42,11 +39,7 @@ export default function InsightsClient({
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
         const list = Array.isArray(data?.insights) ? data.insights : [];
-        const ts =
-          (data.updatedAt as string) ||
-          (data.receivedAt as string) ||
-          (data.updated_at as string) ||
-          null;
+        const ts = (data.updatedAt as string) || null;
 
         if (!cancelled) {
           setInsights(list);
@@ -61,9 +54,7 @@ export default function InsightsClient({
         }
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [apiUrl, refreshKey]);
 
   if (loading) {

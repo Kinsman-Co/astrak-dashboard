@@ -17,16 +17,15 @@ type Props = {
   title?: string;
 };
 
-const DEBUG = process.env.NEXT_PUBLIC_INSIGHTS_DEBUG === "1";
-
 export default function InsightsClient({ brandId, viewKey, refreshKey, title }: Props) {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("");
 
   const apiUrl = useMemo(() => {
-    // Normalise to lowercase so KV keys always match
+    // Normalise to lowercase so KV keys always match server
     const b = (brandId || "").toLowerCase();
     const v = (viewKey || "").toLowerCase();
     return `/api/insights/${encodeURIComponent(b)}/${encodeURIComponent(v)}`;
@@ -36,16 +35,17 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
     let cancelled = false;
     setLoading(true);
     setErr(null);
+    setStatus("");
 
-    fetch(apiUrl, { cache: "no-store" })
-      .then(async (r) => {
+    (async () => {
+      try {
+        const r = await fetch(apiUrl, { cache: "no-store" });
+        setStatus(`HTTP ${r.status}`);
         if (!r.ok) {
-          const text = await r.text().catch(() => "");
-          throw new Error(`HTTP ${r.status}${text ? ` — ${text}` : ""}`);
+          const t = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status}${t ? ` — ${t}` : ""}`);
         }
-        return r.json();
-      })
-      .then((data) => {
+        const data = await r.json();
         const list = Array.isArray(data?.insights) ? data.insights : [];
         const ts = (data?.updatedAt as string) || null;
 
@@ -54,37 +54,36 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
           setUpdatedAt(ts);
           setLoading(false);
         }
-      })
-      .catch((e: any) => {
+      } catch (e: any) {
         if (!cancelled) {
           setErr(e?.message || "Failed to load insights");
           setLoading(false);
         }
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [apiUrl, refreshKey]);
 
-  // Optional debug banner
-  const DebugBar = DEBUG ? (
+  // Always-visible, minimal debug line
+  const DebugLine = (
     <div
       style={{
         marginBottom: 8,
-        padding: "6px 10px",
+        padding: "4px 8px",
         fontSize: 12,
-        borderRadius: 8,
-        border: "1px dashed #c7d2fe",
-        background: "#eef2ff",
-        color: "#3730a3",
+        borderRadius: 6,
+        border: "1px dashed #CBD5E1",
+        background: "#F8FAFC",
+        color: "#334155",
         wordBreak: "break-all",
       }}
     >
-      Debug: GET {apiUrl}
-      {err ? ` — ${err}` : ""}
+      Insights request → <strong>{apiUrl}</strong> {status ? ` • ${status}` : ""} {(!loading && !err) ? ` • count=${insights.length}` : ""}
     </div>
-  ) : null;
+  );
 
   if (loading) {
     return (
@@ -97,7 +96,7 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
           textAlign: "center",
         }}
       >
-        {DebugBar}
+        {DebugLine}
         Loading insights…
       </div>
     );
@@ -113,7 +112,7 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
           borderRadius: 8,
         }}
       >
-        {DebugBar}
+        {DebugLine}
         <strong>Couldn’t load insights.</strong>
         <div style={{ marginTop: 6, color: "#991B1B" }}>{err}</div>
       </div>
@@ -130,7 +129,7 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
           borderRadius: 8,
         }}
       >
-        {DebugBar}
+        {DebugLine}
         No insights generated yet.
       </div>
     );
@@ -138,7 +137,8 @@ export default function InsightsClient({ brandId, viewKey, refreshKey, title }: 
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      {DebugBar}
+      {DebugLine}
+
       <div
         style={{
           display: "flex",

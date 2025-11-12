@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Embed from "@/components/Embed";
-import MonthlyInsights from "@/components/MonthlyInsights";
+import Embed from "../../components/Embed";
+import MonthlyInsights from "../../components/MonthlyInsights";
 
 export type TabKey = "channels" | "funnel" | "seo" | "creative";
 export type ViewMode = "weekly" | "monthly";

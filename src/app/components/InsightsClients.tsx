@@ -14,9 +14,7 @@ type Props = {
   brandId: string;
   /** e.g. "channels.monthly", "seo.weekly" */
   viewKey: string;
-  /** Optional: force refetch on tab/mode change */
   refreshKey?: string | number;
-  /** Optional heading (falls back to “Insights”) */
   title?: string;
 };
 

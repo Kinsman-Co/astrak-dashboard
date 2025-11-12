@@ -1,47 +1,86 @@
-type Insight = { metric: string; change: string; why: string; next: string };
+// app/components/Insights.tsx
+import React from "react";
 
-export default function Insights({
-  items,
+type ViewMode = "weekly" | "monthly";
+type Insight = {
+  metric: string;
+  change?: string;
+  why: string;
+  next: string;
+  confidence?: "low" | "medium" | "high" | string;
+};
+
+async function getInsights(brand: string, view: ViewMode) {
+  // Relative fetch works on server; no credentials needed.
+  // Use `cache: "no-store"` so new n8n posts appear immediately.
+  const res = await fetch(`/api/insights/${brand}/${view}`, { cache: "no-store" });
+  if (!res.ok) return { updatedAt: null, insights: [] as Insight[] };
+  return res.json() as Promise<{ updatedAt: string | null; insights: Insight[] }>;
+}
+
+function ConfidenceBadge({ level }: { level?: string }) {
+  const color =
+    level === "high" ? "bg-emerald-100 text-emerald-800 border-emerald-200" :
+    level === "medium" ? "bg-amber-100 text-amber-800 border-amber-200" :
+    "bg-slate-100 text-slate-700 border-slate-200";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${color}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+      {level ?? "n/a"}
+    </span>
+  );
+}
+
+export default async function Insights({
+  brand,
+  view,
   title = "Insights",
 }: {
-  items: Insight[];
+  brand: string;
+  view: ViewMode;
   title?: string;
 }) {
-  if (!items || items.length === 0) return null;
+  const { insights, updatedAt } = await getInsights(brand, view);
 
   return (
-    <section style={{ maxWidth: 1200, margin: "2rem auto 0", padding: "0 1rem" }}>
-      <h2 style={{ marginBottom: "0.75rem", fontSize: 20 }}>{title}</h2>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "12px",
-        }}
-      >
-        {items.map((it, i) => (
-          <div
-            key={i}
-            style={{
-              background: "white",
-              border: "1px solid #E5E7EB",
-              borderRadius: 10,
-              padding: "14px 16px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>
-              {it.metric} {it.change && <span style={{ opacity: 0.8 }}>({it.change})</span>}
-            </div>
-            <div style={{ marginBottom: 6 }}>
-              <strong>Why:</strong> {it.why}
-            </div>
-            <div>
-              <strong>Next step:</strong> {it.next}
-            </div>
-          </div>
-        ))}
+    <section className="mx-auto w-full max-w-[1200px]">
+      <div className="mb-3 flex items-end justify-between">
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <div className="text-xs text-slate-500">
+          {updatedAt ? `Updated ${new Date(updatedAt).toLocaleString()}` : "No updates yet"}
+        </div>
       </div>
+
+      {(!insights || insights.length === 0) ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-slate-600">
+          No insights yet. When your n8n job runs, AI notes will appear here.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {insights.map((i, idx) => (
+            <article
+              key={idx}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_0_rgba(15,23,42,0.04)]"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-medium text-slate-900">{i.metric}</h3>
+                <ConfidenceBadge level={i.confidence} />
+              </div>
+              {i.change ? (
+                <p className="text-sm text-slate-600">
+                  <span className="font-medium text-slate-900">Change:</span> {i.change}
+                </p>
+              ) : null}
+              <p className="mt-2 text-sm text-slate-700">
+                <span className="font-medium text-slate-900">Why:</span> {i.why}
+              </p>
+              <p className="mt-2 text-sm text-slate-700">
+                <span className="font-medium text-slate-900">Next:</span> {i.next}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

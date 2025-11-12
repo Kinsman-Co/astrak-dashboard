@@ -42,12 +42,13 @@ export default function BrandClient({ id }: { id: string }) {
   }, []);
 
   const reportUrl = useMemo(() => REPORT_URLS[tab]?.[mode] || "", [tab, mode]);
-  const viewKey = `${tab}.${mode}`;
+  const viewKey = `${tab}.${mode}`; // e.g. channels.monthly
 
   return (
     <div style={{ padding: 24 }}>
       <div style={{ textAlign: "center", marginBottom: 12, opacity: 0.8 }}>{id}</div>
 
+      {/* Tabs */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
         {TABS.map((t) => (
           <button
@@ -67,6 +68,7 @@ export default function BrandClient({ id }: { id: string }) {
         ))}
       </div>
 
+      {/* Modes */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
         {MODES.map((m) => (
           <button
@@ -86,15 +88,30 @@ export default function BrandClient({ id }: { id: string }) {
         ))}
       </div>
 
+      {/* Embed */}
       {reportUrl ? (
-        <Embed src={reportUrl} title={`${tab} — ${mode}`} height={1000} params={{ brand: id, view: viewKey }} />
+        <Embed
+          src={reportUrl}
+          title={`${tab} — ${mode}`}
+          height={1000}
+          params={{ brand: id, view: viewKey }}
+        />
       ) : (
-        <div style={{ padding: "1rem", border: "1px solid #e5e7eb", borderRadius: 8, background: "#fff7ed", marginBottom: 12 }}>
+        <div
+          style={{
+            padding: "1rem",
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            background: "#fff7ed",
+            marginBottom: 12,
+          }}
+        >
           Add an embed URL for <strong>{tab}</strong> / <strong>{mode}</strong> (env:
           <code> NEXT_PUBLIC_LS_{tab.toUpperCase()}_{mode.toUpperCase()}_URL</code>).
         </div>
       )}
 
+      {/* Insights */}
       <div style={{ marginTop: 16 }}>
         <InsightsClient
           brandId={id}

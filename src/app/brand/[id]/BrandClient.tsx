@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Embed from "../../components/Embed";
-import MonthlyInsights from "../../components/MonthlyInsights";
+import InsightsClient from "../../components/InsightsClient";
 
 export type TabKey = "channels" | "funnel" | "seo" | "creative";
 export type ViewMode = "weekly" | "monthly";
@@ -10,7 +10,7 @@ export type ViewMode = "weekly" | "monthly";
 const TABS: TabKey[] = ["channels", "funnel", "seo", "creative"];
 const MODES: ViewMode[] = ["weekly", "monthly"];
 
-/** Map each tab+mode to a Looker Studio base embed URL (no query params). */
+/** Base embed URLs per section+mode (public envs) */
 const REPORT_URLS: Record<TabKey, Partial<Record<ViewMode, string>>> = {
   channels: {
     weekly: process.env.NEXT_PUBLIC_LS_CHANNELS_WEEKLY_URL || "",
@@ -32,9 +32,9 @@ const REPORT_URLS: Record<TabKey, Partial<Record<ViewMode, string>>> = {
 
 export default function BrandClient({ id }: { id: string }) {
   const [tab, setTab] = useState<TabKey>("channels");
-  const [mode, setMode] = useState<ViewMode>("monthly"); // default to Monthly for this task
+  const [mode, setMode] = useState<ViewMode>("monthly");
 
-  // Optional: deep-linking via ?tab=channels&mode=monthly
+  // Optional deep-linking (?tab=channels&mode=weekly)
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const t = sp.get("tab") as TabKey | null;
@@ -44,13 +44,16 @@ export default function BrandClient({ id }: { id: string }) {
   }, []);
 
   const reportUrl = useMemo(() => {
-    const url = REPORT_URLS[tab]?.[mode] || "";
-    return url;
+    return REPORT_URLS[tab]?.[mode] || "";
   }, [tab, mode]);
+
+  const viewKey = `${tab}.${mode}`; // e.g. "channels.monthly"
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ textAlign: "center", marginBottom: 12, opacity: 0.8 }}>{id}</div>
+      <div style={{ textAlign: "center", marginBottom: 12, opacity: 0.8 }}>
+        {id}
+      </div>
 
       {/* Tab controls */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
@@ -98,7 +101,7 @@ export default function BrandClient({ id }: { id: string }) {
           src={reportUrl}
           title={`${tab} — ${mode}`}
           height={1000}
-          params={{ brand: id, view: mode }}
+          params={{ brand: id, view: viewKey }}
         />
       ) : (
         <div
@@ -110,17 +113,19 @@ export default function BrandClient({ id }: { id: string }) {
             marginBottom: 12,
           }}
         >
-          Missing embed URL for <strong>{tab}</strong> / <strong>{mode}</strong>. Set the corresponding{" "}
-          <code>NEXT_PUBLIC_LS_*_URL</code> env var.
+          Add an embed URL for <strong>{tab}</strong> / <strong>{mode}</strong> (public env:
+          <code> NEXT_PUBLIC_LS_{tab.toUpperCase()}_{mode.toUpperCase()}_URL</code>).
         </div>
       )}
 
-      {/* Insights directly under the report, only for Channels + Monthly */}
-      {tab === "channels" && mode === "monthly" && (
-        <div style={{ marginTop: 16 }}>
-          <MonthlyInsights brandId={id} />
-        </div>
-      )}
+      {/* Insights under every page (no demo; shows "No insights generated yet.") */}
+      <div style={{ marginTop: 16 }}>
+        <InsightsClient
+          brandId={id}
+          viewKey={viewKey}
+          title={`${tab.charAt(0).toUpperCase() + tab.slice(1)} — ${mode[0].toUpperCase() + mode.slice(1)} Insights`}
+        />
+      </div>
     </div>
   );
 }

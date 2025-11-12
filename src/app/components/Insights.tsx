@@ -1,5 +1,6 @@
-// app/components/Insights.tsx
+// src/app/components/Insights.tsx
 import React from "react";
+import { headers } from "next/headers";
 
 type ViewMode = "weekly" | "monthly";
 type Insight = {
@@ -11,9 +12,15 @@ type Insight = {
 };
 
 async function getInsights(brand: string, view: ViewMode) {
-  // Relative fetch works on server; no credentials needed.
-  // Use `cache: "no-store"` so new n8n posts appear immediately.
-  const res = await fetch(`/api/insights/${brand}/${view}`, { cache: "no-store" });
+  const h = await headers();
+  const host = h.get("host") ?? "";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const base = `${protocol}://${host}`;
+
+  const res = await fetch(`${base}/api/insights/${brand}/${view}`, {
+    cache: "no-store",
+  });
+
   if (!res.ok) return { updatedAt: null, insights: [] as Insight[] };
   return res.json() as Promise<{ updatedAt: string | null; insights: Insight[] }>;
 }

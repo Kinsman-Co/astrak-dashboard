@@ -1,84 +1,59 @@
-import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
+import { NextResponse } from "next/server";
 
-type Params = { params: { brand: string; view: string } };
+type ViewMode = "weekly" | "monthly";
+type Insight = { metric: string; change?: string; why: string; next: string; confidence?: string };
 
-const REQUIRED_TOKEN_ENV = "INSIGHTS_WRITE_TOKEN";
-
-/** KV key: insights:<brand>:<viewKey> */
-function kvKey(brand: string, view: string) {
+function keyFor(brand: string, view: ViewMode) {
   return `insights:${brand}:${view}`;
 }
 
-export async function GET(_req: Request, { params }: Params) {
-  const brand = decodeURIComponent(params.brand || "").trim();
-  const view = decodeURIComponent(params.view || "").trim();
+// ✅ Updated route handlers compatible with Next.js 16
 
-  if (!brand || !view) {
-    return NextResponse.json(
-      { insights: [], updatedAt: null, error: "Missing brand or view" },
-      { status: 400 }
-    );
-  }
+export async function GET(
+  _req: Request,
+  context: any
+) {
+  const { brand, view } = context.params as { brand: string; view: ViewMode };
+  const record = (await kv.get(keyFor(brand, view))) as
+    | { insights?: Insight[]; updatedAt?: string }
+    | null;
 
-  try {
-    const stored = await kv.get<{ insights: any[]; updatedAt?: string }>(
-      kvKey(brand, view)
-    );
-
-    if (!stored) {
-      // Explicit: no demo, no seed – return empty array.
-      return NextResponse.json({ insights: [], updatedAt: null });
-    }
-
-    const insights = Array.isArray(stored.insights) ? stored.insights : [];
-    const updatedAt = stored.updatedAt ?? null;
-
-    return NextResponse.json({ insights, updatedAt });
-  } catch (err: any) {
-    return NextResponse.json(
-      { insights: [], updatedAt: null, error: err?.message || "Read failed" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    brand,
+    view,
+    updatedAt: record?.updatedAt ?? null,
+    insights: record?.insights ?? [],
+  });
 }
 
-export async function POST(req: Request, { params }: Params) {
-  const brand = decodeURIComponent(params.brand || "").trim();
-  const view = decodeURIComponent(params.view || "").trim();
+export async function POST(
+  req: Request,
+  context: any
+) {
+  const { brand, view } = context.params as { brand: string; view: ViewMode };
 
-  if (!brand || !view) {
-    return NextResponse.json(
-      { error: "Missing brand or view" },
-      { status: 400 }
-    );
-  }
+  const auth = req.headers.get("authorization") || "";
+  const token = process.env.INSIGHTS_WRITE_TOKEN;
 
-  // Bearer token guard
-  const required = process.env[REQUIRED_TOKEN_ENV];
-  const authHeader = req.headers.get("authorization") || "";
-  const token = authHeader.replace(/^Bearer\s+/i, "");
-
-  if (!required || token !== required) {
+  if (!token || !auth.startsWith("Bearer ") || auth.slice(7) !== token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let payload: any;
   try {
-    const body = await req.json().catch(() => ({}));
-    const insights = Array.isArray(body?.insights) ? body.insights : [];
-
-    // Allow an empty array (will result in "No insights generated yet." in UI).
-    const payload = {
-      insights,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await kv.set(kvKey(brand, view), payload);
-    return NextResponse.json({ ok: true, count: insights.length });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || "Write failed" },
-      { status: 500 }
-    );
+    payload = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  const insights = payload?.insights;
+  if (!Array.isArray(insights)) {
+    return NextResponse.json({ error: "Missing insights[]" }, { status: 400 });
+  }
+
+  const record = { insights, updatedAt: new Date().toISOString() };
+  await kv.set(keyFor(brand, view), record);
+
+  return NextResponse.json({ ok: true, ...record });
 }

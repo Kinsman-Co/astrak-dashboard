@@ -1,11 +1,12 @@
-// app/brand/[id]/page.tsx
+// src/app/brand/[id]/page.tsx
 import BrandClient from "./BrandClient";
 
-export default function BrandPage({
+export default async function BrandPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
+
   return <BrandClient id={id} />;
 }

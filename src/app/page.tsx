@@ -1,80 +1,57 @@
-"use client";
-
-import { useState } from "react";
-import Embed from "./components/Embed";
-import { astrakConfig } from "../config/astrak";
-
-type ViewMode = "weekly" | "monthly";
+// app/page.tsx
+import Link from "next/link";
 
 export default function Home() {
-  const [mode, setMode] = useState<ViewMode>("weekly");
-  const url = astrakConfig.overview.kpiReports[mode];
-
-  const isPlaceholder =
-    !url || url.includes("REPLACE_") || url.endsWith("/REPLACE_ME");
-
   return (
-    <main style={{ maxWidth: 1400, margin: "0 auto", padding: "1rem" }}>
-      <h1 style={{ textAlign: "center", margin: "1rem 0" }}>
-        {astrakConfig.overview.name}
+    <main
+      style={{
+        maxWidth: 960,
+        margin: "0 auto",
+        padding: 24,
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
+      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }}>
+        Astrak Performance Dashboard
       </h1>
+      <p style={{ marginBottom: 24, color: "#4b5563" }}>
+        Choose a brand to view its Looker Studio dashboards and n8n-powered
+        insights.
+      </p>
 
-      {/* Weekly / Monthly toggle */}
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
-          gap: "1rem",
-          marginBottom: "1rem",
+          flexDirection: "column",
+          gap: 12,
+          maxWidth: 400,
         }}
       >
-        <button
-          onClick={() => setMode("weekly")}
+        <Link
+          href="/brands"
           style={{
-            background: mode === "weekly" ? "#111827" : "#E5E7EB",
-            color: mode === "weekly" ? "white" : "#111827",
-            border: "none",
-            borderRadius: "6px",
-            padding: "0.5rem 1rem",
-            cursor: "pointer",
-          }}
-        >
-          Weekly
-        </button>
-        <button
-          onClick={() => setMode("monthly")}
-          style={{
-            background: mode === "monthly" ? "#111827" : "#E5E7EB",
-            color: mode === "monthly" ? "white" : "#111827",
-            border: "none",
-            borderRadius: "6px",
-            padding: "0.5rem 1rem",
-            cursor: "pointer",
-          }}
-        >
-          Monthly
-        </button>
-      </div>
-
-      {/* Embed or helpful message */}
-      {isPlaceholder ? (
-        <div
-          style={{
-            background: "#FFF8DB",
-            border: "1px solid #FACC15",
-            padding: "1rem",
+            padding: "10px 14px",
             borderRadius: 8,
-            textAlign: "center",
+            border: "1px solid #e5e7eb",
+            background: "#f9fafb",
+            textDecoration: "none",
           }}
         >
-          <p>
-            Add real embed URLs in <code>src/config/astrak.ts</code> for{" "}
-            <code>{`overview.kpiReports.${mode}`}</code> to see the report here.
-          </p>
-        </div>
-      ) : (
-        <Embed src={url} title={`Overview (${mode})`} />
-      )}
+          → View brands
+        </Link>
+        <Link
+          href="/brand/astrak"
+          style={{
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: "1px solid #e5e7eb",
+            background: "#f9fafb",
+            textDecoration: "none",
+          }}
+        >
+          → Go straight to Astrak brand dashboard
+        </Link>
+      </div>
     </main>
   );
 }

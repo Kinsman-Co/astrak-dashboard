@@ -3,7 +3,8 @@ import { kv } from "@vercel/kv";
 
 type Params = { params: { brand: string; view: string } };
 
-const REQUIRED_TOKEN_ENV = "9fb73837248c6ad8714555b45b8ce95a25426131b02eaef6fbfe170ca00ad072";
+// This should be the ENV VARIABLE NAME, not the token itself:
+const REQUIRED_TOKEN_ENV = "INSIGHTS_WRITE_TOKEN";
 
 /** Canonical KV key: insights:<brandLower>:<viewLower> */
 function kvKey(brand: string, view: string) {

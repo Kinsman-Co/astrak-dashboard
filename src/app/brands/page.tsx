@@ -1,37 +1,25 @@
-import React from "react";
+// app/brands/page.tsx
 import Link from "next/link";
 
-/**
- * Brands index page.
- * Lists available brands and links to /brand/[id].
- * Configure brands via NEXT_PUBLIC_BRANDS="astrak,anotherbrand"
- */
-export default async function BrandsPage() {
-  const raw = process.env.NEXT_PUBLIC_BRANDS || "astrak";
-  const brands = raw.split(",").map((s) => s.trim()).filter(Boolean);
+const BRANDS = [
+  { id: "astrak", name: "Astrak" },
+  // add more brands here...
+];
 
+export default function BrandsIndex() {
   return (
-    <div style={{ padding: 24 }}>
-      <h1 style={{ fontSize: 20, marginBottom: 12 }}>Brands</h1>
-      <div style={{ display: "grid", gap: 10 }}>
-        {brands.map((id) => (
-          <Link
-            key={id}
-            href={`/brand/${encodeURIComponent(id)}`}
-            style={{
-              display: "block",
-              padding: "10px 12px",
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-              background: "#fff",
-              textDecoration: "none",
-              color: "#111827",
-            }}
-          >
-            /brand/{id}
-          </Link>
+    <main style={{ maxWidth: 960, margin: "0 auto" }}>
+      <h1 style={{ marginBottom: 16 }}>Brands</h1>
+      <ul style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))" }}>
+        {BRANDS.map((b) => (
+          <li key={b.id} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 12, background: "#fff" }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>{b.name}</div>
+            <Link href={`/brand/${b.id}`} style={{ color: "#2563eb" }}>
+              Open dashboard →
+            </Link>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </main>
   );
 }
